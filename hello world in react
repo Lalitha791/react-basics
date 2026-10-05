@@ -1,0 +1,32 @@
+src-> pages (folder) -> login.jsx page
+
+function Login(){
+    return(
+        <div>
+            <p>hello world</p>
+        </div>
+    );
+}
+export default Login;
+
+
+src-> App.js page
+
+
+  import Login from './pages/login';
+import { BrowserRouter, Routes, Route, } from 'react-router-dom';
+
+function App() {
+  return (
+    <div className="App">
+      <BrowserRouter>
+        <Routes>
+    <Route path='login'element={<Login/>}/>
+
+        </Routes>
+      </BrowserRouter>
+    </div>
+  );
+}
+
+export default App;
