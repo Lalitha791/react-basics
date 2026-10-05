@@ -8,13 +8,12 @@ function Profile() {
   const [geterroremail, seterroremail] = useState(false);
   const [studentdata, setstudentdata] = useState([]);
   const [studentcount, setstudentcount] = useState(0);
+  const [updateid,setupdateid]=useState("");
 
   const isdisabled = !getname || !getphone;
 
-
-  // save call 
+  // save call
   async function submit(e) {
-   
     e.preventDefault();
 
     const response = await fetch(
@@ -39,37 +38,56 @@ function Profile() {
   }
 
   // get api call for the all student  data
- 
-    const fetchStudents = async () => {
-      const response = await fetch(
-        "https://api.elurucoders.online/api/students",
-      );
-      const result = await response?.json();
-      setstudentdata(result?.data);
-      setstudentcount(result?.count);
-      console.log(result?.data);
-    };
- 
-    useEffect(()=>{
-      fetchStudents();
-    },[]);
 
+  const fetchStudents = async () => {
+    const response = await fetch("https://api.elurucoders.online/api/students");
+    const result = await response?.json();
+    setstudentdata(result?.data);
+    setstudentcount(result?.count);
+    console.log(result?.data);
+  };
 
-  
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
   // get api call for the student indivual data
 
   const handleEdit = async (studentId) => {
-    console.log("studentId",studentId);
+    setupdateid(studentId)
+    console.log("studentId", studentId);
     try {
-      const response = await fetch(`https://api.elurucoders.online/api/students/${studentId}`);
+      const response = await fetch(
+        `https://api.elurucoders.online/api/students/${studentId}`,
+      );
       const jsonResult = await response.json();
-      console.log("jsonResult",jsonResult.data);
+      console.log("jsonResult", jsonResult.data);
       setname(jsonResult.data.name);
-
+      setphone(jsonResult.data.phone);
+      setemail(jsonResult.data.email);
     } catch (error) {
       console.error("Error fetching single student:", error);
     }
   };
+
+  async function update() {
+    const response = await fetch(
+      `https://api.elurucoders.online/api/students/${updateid}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+           name: getname,
+          email: getemail,
+          phone: getphone,
+        }),
+      },
+    );
+    const data = await response.json();
+    fetchStudents();
+  }
 
 
 
@@ -82,8 +100,6 @@ function Profile() {
   function handleErrorEmail() {
     getemail === "@gmail.com" ? seterroremail(true) : seterroremail(false);
   }
-
-
 
   return (
     <div>
@@ -127,7 +143,11 @@ function Profile() {
         />
         {geterroremail && getemail == "@gmail.com" && <p>{"email is req"}</p>}
         <button disabled={isdisabled}>submit</button>
+        <button onClick={update}>Update</button>
       </form>
+
+
+
       <h1>list {studentcount}</h1>
       <table border="1">
         <thead>
