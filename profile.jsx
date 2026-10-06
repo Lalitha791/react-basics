@@ -182,7 +182,8 @@ function Profile() {
             <th>Name</th>
             <th>Phone</th>
             <th>Email</th>
-            <th>action</th>
+            <th>action1</th>
+            
           </tr>
         </thead>
 
