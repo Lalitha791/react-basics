@@ -7,7 +7,9 @@ function Profile() {
   const [message, setmessage] = useState("");
   const [studentdata, setstudentdata] = useState([]);
   const [studentcount, setstudentcount] = useState(0);
+  const [updateid, setupdateid] = useState("");
 
+  // CREATE
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -34,11 +36,9 @@ function Profile() {
       "https://api.elurucoders.online/api/students",
       {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           name: name,
           email: email,
@@ -56,40 +56,113 @@ function Profile() {
     setname("");
     setphone("");
     setemail("");
-  }
-  // get api call for all student data
 
+    fetchStudents();
+  }
+
+  // GET ALL STUDENTS
   const fetchStudents = async () => {
     const response = await fetch("https://api.elurucoders.online/api/students");
-    const result = await response?.json();
+
+    const result = await response.json();
+
     setstudentdata(result?.data);
     setstudentcount(result?.count);
+
     console.log(result?.data);
   };
 
+  // RUN WHEN PAGE LOADS
   useEffect(() => {
     fetchStudents();
   }, []);
 
-  // get api call for the student indivual data
-
+  // GET INDIVIDUAL STUDENT
   const handleEdit = async (studentId) => {
+    setupdateid(studentId);
+
     console.log("studentId", studentId);
+
     try {
       const response = await fetch(
         `https://api.elurucoders.online/api/students/${studentId}`,
       );
+
       const jsonResult = await response.json();
+
       console.log("jsonResult", jsonResult.data);
+
       setname(jsonResult.data.name);
+      setphone(jsonResult.data.phone);
+      setemail(jsonResult.data.email);
     } catch (error) {
       console.error("Error fetching single student:", error);
     }
   };
 
+  // UPDATE
+  async function update() {
+    if (updateid === "") {
+      setmessage("Please select a student to update");
+      return;
+    }
+
+    const response = await fetch(
+      `https://api.elurucoders.online/api/students/${updateid}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          phone: phone,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    console.log(data);
+
+    setmessage("Details updated successfully");
+
+    setname("");
+    setphone("");
+    setemail("");
+    setupdateid("");
+
+    fetchStudents();
+  }
+
+  // DELETE
+  const handleDelete = async (studentId) => {
+    console.log("studentId", studentId);
+
+    try {
+      const response = await fetch(
+        `https://api.elurucoders.online/api/students/${studentId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const jsonResult = await response.json();
+
+      console.log("jsonResult", jsonResult.data);
+
+      setmessage("Student deleted successfully");
+
+      fetchStudents();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    }
+  };
+
   return (
     <div>
-      <p>hello world</p>
+      <p>Hello World</p>
 
       <form onSubmit={handleSubmit}>
         <label>Name</label>
@@ -125,17 +198,27 @@ function Profile() {
         <br />
         <br />
 
+        <button type="button" onClick={update}>
+          Update
+        </button>
+
         <button type="submit">Submit</button>
 
         <p
           style={{
             color:
-              message === "Details submitted successfully" ? "green" : "red",
+              message === "Details submitted successfully" ||
+              message === "Details updated successfully" ||
+              message === "Student deleted successfully"
+                ? "green"
+                : "red",
           }}
         >
           {message}
         </p>
       </form>
+
+      <h1>List {studentcount}</h1>
 
       <table border="1">
         <thead>
@@ -144,19 +227,29 @@ function Profile() {
             <th>Name</th>
             <th>Phone</th>
             <th>Email</th>
-            <th>action</th>
+            <th>Action1</th>
+            <th>Action2</th>
           </tr>
         </thead>
 
         <tbody>
           {studentdata?.map((student, index) => (
-            <tr key={index}>
+            <tr key={student._id}>
               <td>{index + 1}</td>
               <td>{student.name}</td>
               <td>{student.phone}</td>
               <td>{student.email}</td>
+
               <td>
-                <button onClick={() => handleEdit(student._id)}>edit</button>
+                <button type="button" onClick={() => handleEdit(student._id)}>
+                  Edit
+                </button>
+              </td>
+
+              <td>
+                <button type="button" onClick={() => handleDelete(student._id)}>
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
