@@ -12,7 +12,7 @@ function Profile() {
 
   const isdisabled = !getname || !getphone;
 
-  // save call
+  // create call
   async function submit(e) {
     e.preventDefault();
 
@@ -70,6 +70,7 @@ function Profile() {
     }
   };
 
+  // update function
   async function update() {
     const response = await fetch(
       `https://api.elurucoders.online/api/students/${updateid}`,
@@ -90,6 +91,23 @@ function Profile() {
   }
 
 
+// delete call 
+  const handleDelete = async (studentId) => {
+    console.log("studentId", studentId);
+    try {
+      const response = await fetch(
+        `https://api.elurucoders.online/api/students/${studentId}`,
+        { method: "DELETE" },
+      );
+      const jsonResult = await response.json();
+      console.log("jsonResult", jsonResult.data);
+      fetchStudents();
+    } catch (error) {
+      console.error("Error fetching single student:", error);
+    }
+  };
+
+// form conditions
 
   function handleErrorName() {
     getname === "" ? seterrorname(true) : seterrorname(false);
@@ -100,11 +118,15 @@ function Profile() {
   function handleErrorEmail() {
     getemail === "@gmail.com" ? seterroremail(true) : seterroremail(false);
   }
-
+// display content and  form with (submit, update)button  and table
   return (
     <div>
       <p> welcome to my Profile page </p>
-      <form onSubmit={submit}>
+
+      <form onSubmit={submit}> 
+
+
+
         <label>
           name<span style={{ color: getname === "" ? "red" : "black" }}>*</span>
         </label>
@@ -134,6 +156,8 @@ function Profile() {
         <br />
 
         <label>email</label>
+
+
         <input
           type="text"
           onChange={(e) => setemail(e.target.value)}
@@ -142,6 +166,8 @@ function Profile() {
           onBlur={handleErrorEmail}
         />
         {geterroremail && getemail == "@gmail.com" && <p>{"email is req"}</p>}
+
+
         <button disabled={isdisabled}>submit</button>
         <button onClick={update}>Update</button>
       </form>
@@ -169,6 +195,7 @@ function Profile() {
               <td>{student.email}</td>
               <td>
                 <button onClick={() => handleEdit(student._id)}>edit</button>
+                <button onClick={() => handleDelete(student._id)}> delete </button>
               </td>
             </tr>
           ))}
